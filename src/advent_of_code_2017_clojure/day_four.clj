@@ -9,18 +9,15 @@
 
 (defn part-one [input]
   (count
-    (filter #(every? #{1}
-                     (vals %))
-            (map frequencies
-                 input))))
+    (filter #(= (count %)
+                (count (set %)))
+            input)))
 
 (defn part-two [input]
-  (count
-    (filter (fn [passphrase]
-              (apply distinct?
-                     (map frequencies
-                          passphrase)))
-            input)))
+  (count (filter #(= (count %)
+                     (count (set %)))
+                 (map #(map sort %)
+                      input))))
 
 (defn -main [input-file]
   (let [parsed-input (parse-input input-file)]
