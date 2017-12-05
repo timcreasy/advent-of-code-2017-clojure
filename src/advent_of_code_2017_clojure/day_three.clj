@@ -50,25 +50,25 @@
 (defn next-position [{:keys [coords
                              facing]
                       :as board}]
-  (let [next-position (fn [facing [x y]]
-                        (cond
-                          (= facing :up) [x (inc y)]
-                          (= facing :left) [(dec x) y]
-                          (= facing :down) [x (dec y)]
-                          (= facing :right) [(inc x) y]))]
+  (let [next-coords (fn [facing [x y]]
+                      (cond
+                        (= facing :up) [x (inc y)]
+                        (= facing :left) [(dec x) y]
+                        (= facing :down) [x (dec y)]
+                        (= facing :right) [(inc x) y]))]
     (if (get-in board
-                (next-position (turn facing)
-                               coords))
+                (next-coords (turn facing)
+                             coords))
       {:facing facing
-       :coords (next-position facing
-                              coords)}
+       :coords (next-coords facing
+                            coords)}
       {:facing (turn facing)
-       :coords (next-position (turn facing)
-                             coords)})))
+       :coords (next-coords (turn facing)
+                            coords)})))
 
 (defn make-board [n]
   (reduce (fn [board num]
-            (let [{:keys [coords facing] :as abc} (next-position board)]
+            (let [{:keys [coords facing]} (next-position board)]
               (assoc (assoc-in board coords num)
                 :facing facing
                 :coords coords)))
@@ -79,5 +79,42 @@
           (range 3
                  (inc n))))
 
+(defn coord->neighbors [coord]
+  (map (fn [c]
+         (map + coord c))
+       [[1 0]
+        [1 1]
+        [0 1]
+        [-1 1]
+        [-1 0]
+        [-1 -1]
+        [0 -1]
+        [1 -1]]))
+
+
+(defn add-neighbors [board
+                     coord]
+  (apply + (remove nil? (map (fn [c]
+                               (get-in board c))
+                             (coord->neighbors coord)))))
+
+(defn part-two [n]
+  (reduce (fn [board num]
+            (let [{:keys [coords facing]} (next-position board)
+                  neighbor-sum (add-neighbors board
+                                              coords)]
+              (if (> neighbor-sum n)
+                (reduced neighbor-sum)
+                (assoc-in (assoc board
+                            :coords coords
+                            :facing facing)
+                          coords neighbor-sum))))
+          {:coords [1 0]
+           :facing :up
+           0 {0 1}
+           1 {0 1}}
+          (range)))
+
 (defn -main [n]
-  (println (str "Answer One: " (part-one n))))
+  (println (str "Answer One: " (part-one n)))
+  (println (str "Answer Two: " (part-two n))))
