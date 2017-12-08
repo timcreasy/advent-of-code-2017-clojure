@@ -42,7 +42,7 @@
                              registers
                              input)))))
 
-;; Terrible will clean up later
+;; Terrible will clean up later - use reductions and just find max
 (defn part-two [input]
   (let [registers (into {}
                         (map #(vector % 0)
