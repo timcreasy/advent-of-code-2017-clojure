@@ -42,32 +42,25 @@
                              registers
                              input)))))
 
-;; Terrible will clean up later - use reductions and just find max
 (defn part-two [input]
   (let [registers (into {}
                         (map #(vector % 0)
                              (set (map ::register
                                        input))))]
-    (::max (reduce (fn [regs {:keys [::register
-                                     ::action
-                                     ::amount
-                                     ::cond-op
-                                     ::cond-operand-1
-                                     ::cond-operand-2] :as a}]
-                     (if (cond-op (get regs cond-operand-1)
-                                  cond-operand-2)
-                       (let [updated-regs (update regs register action amount)
-                             new-val (get updated-regs
-                                          register)
-                             max (::max updated-regs)]
-                         (if (> new-val max)
-                           (assoc updated-regs
-                             ::max new-val)
-                           updated-regs))
-                       regs))
-                   (assoc registers
-                     ::max 0)
-                   input))))
+    (apply max
+           (mapcat vals
+                   (reductions (fn [regs {:keys [::register
+                                                 ::action
+                                                 ::amount
+                                                 ::cond-op
+                                                 ::cond-operand-1
+                                                 ::cond-operand-2] :as a}]
+                                 (if (cond-op (get regs cond-operand-1)
+                                              cond-operand-2)
+                                   (update regs register action amount)
+                                   regs))
+                               registers
+                               input)))))
 
 (defn -main [input-file]
   (let [parsed-input (parse-input input-file)]
